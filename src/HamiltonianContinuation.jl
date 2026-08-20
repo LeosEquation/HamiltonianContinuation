@@ -6,6 +6,9 @@ using LinearAlgebra
 using PeriodicSchurDecompositions
 using Printf
 
+# Integration
+include("integration/integration.jl")
+
 # Objects
 include("objects/objects.jl")
 
