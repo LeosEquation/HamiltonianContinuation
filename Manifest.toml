@@ -2,7 +2,7 @@
 
 julia_version = "1.12.4"
 manifest_format = "2.0"
-project_hash = "88ed5bbd6aca5a965853f0f0f3670fc994e84a50"
+project_hash = "fc270408750ec5f81eb15ed52652d289bdd297af"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "5970c86505ae9c07bf5bc521ef2bbbb3849e8b7b"
@@ -449,6 +449,12 @@ deps = ["Adapt"]
 git-tree-sha1 = "83cf05ab16a73219e5f6bd1bdfa9848fa24ac627"
 uuid = "46192b85-c4d5-4398-a991-12ede77f4527"
 version = "0.2.0"
+
+[[deps.HamiltonianContinuation]]
+deps = ["LinearAlgebra", "PeriodicSchurDecompositions", "TaylorIntegration", "TaylorSeries"]
+path = "."
+uuid = "761d5b45-d2fa-4f4d-a26a-20e38c0674e9"
+version = "0.1.0"
 
 [[deps.IfElse]]
 git-tree-sha1 = "debdd00ffef04665ccbb3e150747a77560e8fad1"
