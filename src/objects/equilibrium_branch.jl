@@ -2,15 +2,6 @@ abstract type AbstractBranch{U<:Real} end
 
 abstract type AbstractEquilibriumBranch{U<:Real} <: AbstractBranch{U} end
 
-struct EquilibriumBranch{U<:Real} <: AbstractEquilibriumBranch{U}
-    x::Array{U,2}                             # Solution vectors along branch
-    λ::Array{Complex{U},2}                  # Eigenvalues along branch
-    lp::Vector{LimitPoint{U}}                # Limit points
-    hp::Vector{HopfPoint{U}}                 # Hopf points
-    bp::Vector{BranchPoint{U}}               # Branch points
-    stbl::Vector{Int}                        # Stability indicators
-end
-
 struct HamiltonianEquilibriumBranch{U<:Real} <: AbstractEquilibriumBranch{U}
     x::Array{U,2}                            # Solution vectors along branch
     E::Vector{U}                             # Energy values along branch
@@ -20,33 +11,6 @@ struct HamiltonianEquilibriumBranch{U<:Real} <: AbstractEquilibriumBranch{U}
     bp::Vector{HamiltonianBranchPoint{U}}    # Branch points
     stability::Vector{Int}                        # Stability indicators
     tol::Array{U,1}                         # Tolerance in each step
-end
-
-function Base.show(io::IO, obj::EquilibriumBranch)
-    println(io, "Equilibrium Branch")
-    println(io, " ├─ # steps:        ", size(obj.x, 1))
-    println(io, " └─ bifurcation parameter range: [", round(minimum(obj.x[:, end]), digits=4), ", ", round(maximum(obj.x[:, end]), digits=4), "]")
-
-    if !isempty(obj.lp)
-        println(io, "\n  Limit Points:")
-        for (i, p) in enumerate(obj.lp)
-            println(io, "   (", i, ") idx: ", lpad(p.idx, 4), "  |  bif param: ", rpad(round(p.x[end], digits=4), 8))
-        end
-    end
-
-    if !isempty(obj.bp)
-        println(io, "\n  Branch Points:")
-        for (i, p) in enumerate(obj.bp)
-            println(io, "   (", i, ") idx: ", lpad(p.idx, 4), "  |  bif param: ", rpad(round(p.x[end], digits=4), 8))
-        end
-    end
-
-    if !isempty(obj.hp)
-        println(io, "\n  Hopf Points:")
-        for (i, p) in enumerate(obj.hp)
-            println(io, "   (", i, ") idx: ", lpad(p.idx, 4), "  |  bif param: ", rpad(round(p.x[end], digits=4), 8))
-        end
-    end
 end
 
 function Base.show(io::IO, obj::HamiltonianEquilibriumBranch)
