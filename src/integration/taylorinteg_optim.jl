@@ -1,6 +1,6 @@
 # src/integration/taylorinteg_optim.jl
 
-import TaylorIntegration : taylorstep!, 
+import TaylorIntegration:taylorstep!
 
 function taylorinteg_wrap_optim!(
     f!,
@@ -13,7 +13,7 @@ function taylorinteg_wrap_optim!(
     cache::VectorCacheOptim,
     params;
     maxsteps::Int=500,
-    reltol::T = zero(T),
+    reltol::T=zero(T),
 ) where {T<:Real,U<:Number}
 
     (; xaux, t, x, dx, rv, parse_eqs) = cache
