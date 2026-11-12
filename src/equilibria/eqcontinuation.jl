@@ -1,3 +1,62 @@
+"""
+    EquilibriaContinuation(H, f!, bc!, g, x_ini, params, Δs_ini, maxsteps; kwargs...)
+
+Performs numerical continuation of equilibrium points in a Hamiltonian system
+using a pseudo-arclength predictor-corrector method.
+
+The algorithm follows an equilibrium branch starting from an initial equilibrium
+point. At each continuation step, a predictor estimates the next point along
+the branch, while Newton's method corrects the prediction by solving an
+augmented system of equations.
+
+After each successful step, the tangent direction is updated and the Hamiltonian
+energy, eigenvalues, eigenvectors, and stability indicator are calculated.
+
+The algorithm also searches for limit points (LP) and branch points (BP)
+along the equilibrium branch. When a possible bifurcation is detected, its
+location is refined using an extended system.
+
+If Newton's method fails to converge, the continuation step size is reduced.
+After a successful step, it is reset to its initial value. The process continues
+until the maximum number of steps is reached or a stopping condition is satisfied.
+
+# Arguments
+- `H`: Hamiltonian function.
+- `f!`: Function defining the equilibrium equations.
+- `bc!`: Function applying the boundary conditions or constraints.
+- `g`: Stopping condition for the continuation process.
+- `x_ini`: Initial equilibrium point, including the continuation parameter.
+- `params`: Parameters of the system.
+- `Δs_ini`: Initial continuation step size.
+- `maxsteps`: Maximum number of continuation steps.
+
+# Keyword Arguments
+- `atol`: Absolute tolerance. Default: `eps()`.
+- `rtol`: Relative tolerance. Default: `eps()`.
+- `ite`: Maximum number of Newton iterations per continuation step. Default: `20`.
+- `reduce_step`: Factor used to reduce the continuation step size after a failed correction. Default: `1.e-1`.
+- `adapt_step`: Maximum number of consecutive step reductions. Default: `3`.
+- `stbl_ord`: Taylor expansion order used in stability-related calculations. Default: `1`.
+
+# Returns
+A `HamiltonianEquilibriumBranch` object containing:
+
+- `x`: Equilibrium points along the branch.
+- `E`: Hamiltonian energy at each point.
+- `values`: Eigenvalues along the branch.
+- `vectors`: Corresponding eigenvectors.
+- `lp`: Detected limit points.
+- `bp`: Detected branch points.
+- `stability`: Stability indicators along the branch.
+- `tol`: Numerical convergence information at each continuation step.
+
+# Notes
+The state vector must contain one more variable than the number of equilibrium
+equations. The additional variable acts as the continuation parameter.
+
+The initial equilibrium point must have a one-dimensional nullspace in its
+equilibrium Jacobian to define a unique continuation direction.
+"""
 function EquilibriaContinuation(
     H,
     f!,

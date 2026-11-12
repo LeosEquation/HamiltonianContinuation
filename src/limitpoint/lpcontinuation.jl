@@ -1,5 +1,3 @@
-
-
 """
     LPContinuation(f!, g, H, lp_ini::HamiltonianLimitPoint, params, Δs, maxsteps, tol, max_iter)
 
@@ -46,7 +44,6 @@ The continuation stops if the maximum number of steps is reached, if Newton fail
 - The Hamiltonian energy `E` can be used to classify the branch physically or detect turning 
 points in conserved quantities.
 """
-
 function LPContinuation(
     f!,
     lims,
@@ -90,7 +87,7 @@ function LPContinuation(
 
     q0 = zeros(U, 2n - 2)
     q0[1:n] .= lp_ini.x
-    q0[n+1:end] .= lp_ini.nullvec
+    q0[(n+1):end] .= lp_ini.nullvec
     q1 = copy(q0)
 
     ##### Extended system: Jacobian, RHS, predictor vector #####
@@ -112,20 +109,20 @@ function LPContinuation(
 
     f!(dx, xaux, params, zero(U))
 
-    for row in 1:n-2
+    for row in 1:(n-2)
         for col in 1:n
             Jeval[row, col] = dx[row][1][col]
         end
         dxeval[row] = dx[row][0][1]
     end
 
-    λ[1, :] .= eigvals(@view(Jeval[:, 1:n-2]))
+    λ[1, :] .= eigvals(@view(Jeval[:, 1:(n-2)]))
     E[1] = H(x[1, :], params, zero(U))  # <-- compute energy at first point
 
     LPJacobian!(J, Jeval, dx, q0, Φ, ordtup, n)
     LPSystem!(F, Jeval, dxeval, q1, q0, Φ, Δs, n)
 
-    tol[1] = norm(F[1:end-1], Inf)
+    tol[1] = norm(F[1:(end-1)], Inf)
 
     NS = nullspace(J)
 
@@ -144,7 +141,7 @@ function LPContinuation(
     while step <= maxsteps
 
         # Predictor step
-        for idx in 1:2n-2
+        for idx in 1:(2n-2)
             q1[idx] = q0[idx] + Φ[idx] * Δs
         end
 
@@ -160,7 +157,7 @@ function LPContinuation(
 
         f!(dx, xaux, params, 0.0)
 
-        for row in 1:n-2
+        for row in 1:(n-2)
             for col in 1:n
                 Jeval[row, col] = dx[row][1][col]
             end
@@ -196,7 +193,7 @@ function LPContinuation(
 
             f!(dx, xaux, params, 0.0)
 
-            for row in 1:n-2
+            for row in 1:(n-2)
                 for col in 1:n
                     Jeval[row, col] = dx[row][1][col]
                 end
@@ -219,7 +216,7 @@ function LPContinuation(
         if norm(Δq, Inf) <= (atol + rtol * norm(q1, Inf))
             # Store current solution
             x[step, :] .= q1[1:n]
-            λ[step, :] .= eigvals(@view(Jeval[:, 1:n-2]))
+            λ[step, :] .= eigvals(@view(Jeval[:, 1:(n-2)]))
             E[step] = H(x[step, :], params, zero(U))  # <-- compute energy at each accepted step
             tol[step] = norm(Δq, Inf)
             # Update direction
@@ -240,5 +237,5 @@ function LPContinuation(
 
     ##### Return branch of limit points #####
 
-    return HamiltonianLimitPointBranch(x[1:step-1, :], E[1:step-1], λ[1:step-1, :], tol[1:step-1])
+    return HamiltonianLimitPointBranch(x[1:(step-1), :], E[1:(step-1)], λ[1:(step-1), :], tol[1:(step-1)])
 end
