@@ -1,9 +1,3 @@
-using Test
-using HamiltonianContinuation
-using TaylorSeries
-
-set_variables("x", numvars=3)
-
 @testset "EquilibriaContinuation: 1 DOF" begin
 
     # ============================================================

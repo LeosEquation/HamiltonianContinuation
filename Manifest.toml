@@ -2,7 +2,7 @@
 
 julia_version = "1.12.4"
 manifest_format = "2.0"
-project_hash = "25600f54aceea0b333d54e4ca90716f0b05c1a98"
+project_hash = "ad2a0d033c179172f5a7c716414d4b7c506caf06"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "5970c86505ae9c07bf5bc521ef2bbbb3849e8b7b"
@@ -457,7 +457,7 @@ uuid = "46192b85-c4d5-4398-a991-12ede77f4527"
 version = "0.2.0"
 
 [[deps.HamiltonianContinuation]]
-deps = ["LinearAlgebra", "PeriodicSchurDecompositions", "Printf", "TaylorIntegration", "TaylorSeries"]
+deps = ["BenchmarkTools", "LinearAlgebra", "PeriodicSchurDecompositions", "Printf", "TaylorIntegration", "TaylorSeries"]
 path = "."
 uuid = "761d5b45-d2fa-4f4d-a26a-20e38c0674e9"
 version = "0.1.0"
