@@ -58,6 +58,16 @@
         maxsteps;
     )
 
+    residuals = zeros(size(branch.x, 1))
+
+    for i in axes(branch.x, 1)
+        dx = similar(branch.x[i, :])
+
+        equations_1dof!(dx, branch.x[i, :], params, 0.0)
+
+        residuals[i] = maximum(abs.(dx[1:2]))
+    end
+
     # ============================================================
     # Tests
     # ============================================================
