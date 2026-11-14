@@ -27,7 +27,7 @@ until the maximum number of steps is reached or a stopping condition is satisfie
 - `g`: Stopping condition for the continuation process.
 - `x_ini`: Initial equilibrium point, including the continuation parameter.
 - `params`: Parameters of the system.
-- `Δs_ini`: Initial continuation step size.
+- `Δs_ini`: Initial continuation step size and direction (sign).
 - `maxsteps`: Maximum number of continuation steps.
 
 # Keyword Arguments
@@ -162,7 +162,7 @@ function EquilibriaContinuation(
     f!(dx, xaux, params, 0.0)
 
     for j in 1:n
-        for i in 1:n-1
+        for i in 1:(n-1)
             Jeval[i, j] = dx[i][1][j]
         end
     end
@@ -183,10 +183,10 @@ function EquilibriaContinuation(
     EquilibriaJacobian!(J, dx, Φ0, n)
     EquilibriaSystem!(F, dx, x1, x0, Φ0, Δs, n)
 
-    tols[1] = norm(F[1:end-1], Inf)
+    tols[1] = norm(F[1:(end-1)], Inf)
 
     for j in 1:n
-        for k in 1:n-1
+        for k in 1:(n-1)
             Jeval[k, j] = dx[k][1][j]
         end
     end
@@ -203,7 +203,7 @@ function EquilibriaContinuation(
     #     end
     # end
 
-    eigeq = eigen(Jeval[:, 1:n-1])
+    eigeq = eigen(Jeval[:, 1:(n-1)])
     λ_ .= eigeq.values
     ν[1, :, :] .= eigeq.vectors
     # BiProduct!(2.0, Jeval, LinearAlgebra.I, C, n - 1)
@@ -211,7 +211,7 @@ function EquilibriaContinuation(
     lptest0 = Φ0[n]
     bptest0 = det(J)
 
-    for j in 1:n-1
+    for j in 1:(n-1)
         λ[1, j] = λ_[j]
     end
 
@@ -303,12 +303,12 @@ function EquilibriaContinuation(
             normalize!(Φ1)
 
             for j in 1:n
-                for k in 1:n-1
+                for k in 1:(n-1)
                     Jeval[k, j] = dx[k][1][j]
                 end
             end
 
-            eigeq = eigen(Jeval[:, 1:n-1])
+            eigeq = eigen(Jeval[:, 1:(n-1)])
             λ_ .= eigeq.values
             ν[step, :, :] .= eigeq.vectors
             # BiProduct!(2.0, Jeval, LinearAlgebra.I, C, n - 1)
@@ -316,7 +316,7 @@ function EquilibriaContinuation(
             lptest1 = Φ1[n]
             bptest1 = det(J)
 
-            for j in 1:n-1
+            for j in 1:(n-1)
                 λ[step, j] = λ_[j]
             end
 
@@ -348,9 +348,9 @@ function EquilibriaContinuation(
             end
 
             if sign(lptest0) != sign(lptest1) &&
-               sign(bptest0) == sign(bptest1) &&
-               abs(lptest1 - lptest0) > (atol + rtol * norm(abs(lptest1), Inf)) &&
-               step > 2
+                sign(bptest0) == sign(bptest1) &&
+                abs(lptest1 - lptest0) > (atol + rtol * norm(abs(lptest1), Inf)) &&
+                step > 2
 
                 for j in 1:n
                     y[j] = 0.5 * (x1[j] + x0[j])
@@ -361,15 +361,15 @@ function EquilibriaContinuation(
                 f!(dy, yaux, params, 0.0)
 
                 for j in 1:n
-                    for k in 1:n-1
+                    for k in 1:(n-1)
                         Jeval[k, j] = dy[k][1][j]
                     end
                 end
 
-                Dxeigen = eigen(Jeval[:, 1:n-1])
+                Dxeigen = eigen(Jeval[:, 1:(n-1)])
                 idx = argmin(abs.(Dxeigen.values))
 
-                for j in 1:n-1
+                for j in 1:(n-1)
                     vLP[j] = real(Dxeigen.vectors[j, idx])
                 end
 
@@ -395,8 +395,8 @@ function EquilibriaContinuation(
             end
 
             if sign(bptest0) != sign(bptest1) &&
-               abs(bptest1 - bptest0) > (atol + rtol * norm(abs(bptest1), Inf)) &&
-               step > 2
+                abs(bptest1 - bptest0) > (atol + rtol * norm(abs(bptest1), Inf)) &&
+                step > 2
 
                 for j in 1:n
                     y[j] = 0.5 * (x1[j] + x0[j])
@@ -406,17 +406,17 @@ function EquilibriaContinuation(
                 bc!(yaux, params, 0.0)
                 f!(dy, yaux, params, 0.0)
 
-                for j in 1:n-1
-                    for k in 1:n-1
+                for j in 1:(n-1)
+                    for k in 1:(n-1)
                         Jeval[j, k] = dy[k][1][j]
                     end
                 end
 
-                Dxeigen = eigen(Jeval[:, 1:n-1])
+                Dxeigen = eigen(Jeval[:, 1:(n-1)])
 
                 idx = argmin(abs.(Dxeigen.values))
 
-                for j in 1:n-1
+                for j in 1:(n-1)
                     wBP[j] = real(Dxeigen.vectors[j, idx])
                 end
 
@@ -473,6 +473,6 @@ function EquilibriaContinuation(
 
     end
 
-    return HamiltonianEquilibriumBranch(x[1:step-1, :], E[1:step-1], λ[1:step-1, :], ν[1:step-1, :, :], lp, bp, stbl[1:step-1], tols[1:step-1])
+    return HamiltonianEquilibriumBranch(x[1:(step-1), :], E[1:(step-1)], λ[1:(step-1), :], ν[1:(step-1), :, :], lp, bp, stbl[1:(step-1)], tols[1:(step-1)])
 
 end
