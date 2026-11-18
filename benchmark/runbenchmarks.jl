@@ -2,7 +2,7 @@ using HamiltonianContinuation
 using TaylorSeries
 using BenchmarkTools
 
-set_variables("x", numvars=5)
+variables!("x", numvars=5, order=2)
 
 include("equilibria/continuation_1dof.jl")
 println()

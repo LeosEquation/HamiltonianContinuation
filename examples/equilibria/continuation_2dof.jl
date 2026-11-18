@@ -2,7 +2,11 @@ using Revise
 using HamiltonianContinuation
 using TaylorSeries
 
-set_variables("x", numvars=5)
+variables!("x", numvars=5, order=2)
+# jetspace = JetSpace(
+#     order=2,  # usa aquí el orden que necesites
+#     variables=["x₁", "x₂", "x₃", "x₄", "x₅"]
+# )
 
 # ============================================================
 # Hamiltonian system
