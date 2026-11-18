@@ -15,8 +15,8 @@ TaylorSeries = "6aa5eb33-94cf-58f4-a9d0-e4b2c4fc25ea"
 BenchmarkTools = "1.8.0"
 LinearAlgebra = "1.12.0"
 Printf = "1.11.0"
-TaylorIntegration = "0.18.3"
-TaylorSeries = "0.21.2"
+TaylorIntegration = "0.18.19"
+TaylorSeries = "0.23.1"
 julia = "1.12.4"
 
 [extras]
