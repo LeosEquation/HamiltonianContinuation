@@ -1,3 +1,144 @@
+function eqbranch_ini(::Type{U}, maxsteps::Int, n::Int) where {U<:Real}
+    return HamiltonianEquilibriumBranch(
+        Array{U,2}(undef, maxsteps, n),
+        Array{U,1}(undef, maxsteps),
+        Array{Complex{U},2}(undef, maxsteps, n - 1),
+        Array{Complex{U},3}(undef, maxsteps, n - 1, n - 1),
+        HamiltonianLimitPoint{U}[],
+        HamiltonianBranchPoint{U}[],
+        Array{Int,1}(undef, maxsteps),
+        Array{U,1}(undef, maxsteps),
+    )
+end
+
+struct EquilibriumTaylor{T}
+    first_order::T
+    first_order_derivative::T
+    second_order::T
+    second_order_derivative::T
+end
+
+function eqtaylor_ini(n::Int)
+
+    return EquilibriumTaylor(
+        TaylorN.(1:n, order=1),
+        zero(TaylorN.(1:n, order=1)),
+        TaylorN.(1:n, order=2),
+        zero(TaylorN.(1:n, order=2))
+    )
+end
+
+struct ContinuationPoint{T}
+    x::Vector{T}
+    dx::Vector{T}
+    J_ξ::Matrix{T}
+    J_p::Vector{T}
+    x_s::Vector{T}
+end
+
+function ContinuationPoint(::Type{U}, f!, x_ini::Vector{U}, params, t::U)
+
+    n = length(x_ini)
+
+    x = copy(x_ini)
+
+    dx = similar(x_ini)
+
+    f!(dx, x_ini, params, t)
+
+    xT = taylor.first_order
+
+    dxT = taylor.first_order_derivative
+
+    for i in 1:eachindex(x_ini)
+
+        xT[i][0][1] = x_ini[i]
+
+    end
+
+    f!(dxT, xT, params, t)
+
+    J = [dxT[i][1][j] for i in 1:n, j in 1:n]
+
+    x_s = nullspace(J)[:, 1]
+
+    return ContinuationPoint(
+        x,
+        dx,
+        J[1:(n-1), 1:(n-1)],
+        J[1:(n-1), n],
+        x_s
+    )
+end
+
+struct BifurcationPoint{T}
+    x::Vector{T}
+    dx::Vector{T}
+    J_ξ::Matrix{T}
+    J_p::Vector{T}
+    x_s::Vector{T}
+end
+
+function BifurcationPoint(::Type{HamiltonianLimitPoint}, x_ini::Vector{U})
+
+    n = length(x_ini)
+
+    x = zeros(U, 2*n-1)
+
+    dx = zeros(U, 2*n-1)
+
+    J_ξ = zeros(U, 2*n-1, 2*n-1)
+
+    J_p = zeros(U, 2*n-1)
+
+    x_s = zeros(U, 2*n-1) # [nullspace(J_ξ)[:, 1]; zero(U)]
+
+    return BifurcationPoint(
+        x,
+        dx,
+        J_ξ,
+        J_p,
+        x_s
+    )
+end
+
+function BifurcationPoint(::Type{HamiltonianBranchPoint}, x_ini::Vector{U})
+
+    n = length(x_ini)
+
+    x = zeros(U, 2*n)
+
+    dx = zeros(U, 2*n)
+
+    J_ξ = zeros(U, 2*n-1, 2*n-1)
+
+    J_p = zeros(U, 2*n-1)
+
+    x_s = zeros(U, 2*n-1) # [nullspace(J_ξ)[:, 1]; zero(U)]
+
+    return BifurcationPoint(
+        x,
+        dx,
+        J_ξ,
+        J_p,
+        x_s
+    )
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 """
     EquilibriaContinuation(H, f!, bc!, g, x_ini, params, Δs_ini, maxsteps; kwargs...)
 
@@ -70,54 +211,51 @@ function EquilibriaContinuation(
     rtol::U=eps(),
     ite::T=20,
     reduce_step::U=1.e-1,
-    adapt_step::T=3,
-    stbl_ord::T=1,) where {U<:Real,T<:Integer}
+    adapt_step::T=3) where {U<:Real,T<:Integer}
 
     ###
     n = length(x_ini)
     ordtup = [ntuple(k -> count(==(k), (i, j)), TaylorSeries.get_numvars()) for i in 1:n, j in 1:n]
 
     ###
-    x = Array{U,2}(undef, maxsteps, n)
-    E = Array{U,1}(undef, maxsteps)
-    λ = Array{Complex{U},2}(undef, maxsteps, n - 1)
-    ν = Array{Complex{U},3}(undef, maxsteps, n - 1, n - 1)
-    lp = HamiltonianLimitPoint{U}[]
-    bp = HamiltonianBranchPoint{U}[]
-    stbl = Array{Int,1}(undef, maxsteps)
-    tols = Array{U,1}(undef, maxsteps)
+    branch = eqbranch_ini(U, maxsteps, n)
+
+    x = branch.x
+    E = branch.E
+    λ = branch.values
+    ν = branch.vectors
+    lp = branch.lp
+    bp = branch.bp
+    stbl = branch.stability
+    tols = branch.tol
 
     ###
-    δx = TaylorN.(1:n, order=1)
-    δy = TaylorN.(1:n, order=2)
-    δz = TaylorN.(1:TaylorSeries.get_numvars(), order=2)
-    xaux = copy(δx)
-    dx = zero(δx)
-    yaux = copy(δy)
-    dy = zero(δy)
-    zaux = TaylorN.(1:n, order=stbl_ord)
-    Haux = TaylorN(1, order=stbl_ord)
+    taylor = eqtaylor_ini(n)
+
+    xaux = taylor.first_order
+    dx = taylor.first_order_derivative
+    yaux = taylor.second_order
+    dy = taylor.second_order_derivative
 
     ###
     Δs = Δs_ini
     adapt_ite = 0
 
     ###
-    x0 = copy(x_ini)
-    lptest0 = 0.0
-    bptest0 = 0.0
-    Φ0 = zero(x_ini)
+    lp_test = zeros(U, 2)
+    bp_test = zeros(U, 2)
 
     ###
-    x1 = copy(x_ini)
-    lptest1 = 0.0
-    bptest1 = 0.0
-    Φ1 = zero(x_ini)
+    previous = ContinuationPoint(U, x_ini)
+    x0 = previous.x
+    Φ0 = previous.x_s
 
     ###
-    Jeval = zeros(U, n - 1, n)
-    dxeval = zeros(U, n - 1)
-    HessH = zeros(U, n - 1, n - 1)
+    current = ContinuationPoint(U, x_ini)
+    x1 = current.x
+    Φ1 = current.x_s
+    Jeval = [current.J_ξ current.J_p']
+    dxeval = current.dx[1:(n-1)]
 
     ###
     λ_ = Array{Complex{U},1}(undef, n - 1)
@@ -155,7 +293,6 @@ function EquilibriaContinuation(
     for i in 1:n
         xaux[i][0][1] = x1[i]
         yaux[i][0][1] = x1[i]
-        zaux[i][0][1] = x1[i]
     end
 
     bc!(xaux, params, 0.0)
@@ -294,9 +431,9 @@ function EquilibriaContinuation(
 
         if norm(Δx, Inf) <= (atol + rtol * norm(x1, Inf))
 
-            for k in 1:n
-                zaux[k][0][1] = x1[k]
-            end
+            # for k in 1:n
+            #     zaux[k][0][1] = x1[k]
+            # end
 
             Φ1 .= J \ v
 
