@@ -1,0 +1,1 @@
+struct EquilibriumContinuation <: AbstractContinuation end
