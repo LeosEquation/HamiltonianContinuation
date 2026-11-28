@@ -1,5 +1,23 @@
-function build_field(C, problem)
+function build_field(
+    ::EquilibriumContinuation,
+    taylor,
+    problem::EquilibriumProblem{U}
+) where {U<:Real}
 
+    (; dim_variables, dim) = problem
+    (; dx_jet_1) = taylor
+
+    F = zeros(U, dim)
+
+    # Evaluate the physical vector field
+    @inbounds for i in 1:dim_variables
+        F[i] = dx_jet_1[i][0][1]
+    end
+
+    # Initial continuation condition
+    F[dim] = zero(U)
+
+    return F
 end
 
 # Quiero que sea el análogo a esta función:

@@ -7,10 +7,7 @@ struct EquilibriumProblem{U<:Real,F,B,S,P} <: AbstractProblem
     dim_variables::Int
     dim_params::Int
     dim::Int
-    x::Vector{U}
-    dx::Vector{U}
-    x_jet::Vector{TaylorN{U}}
-    dx_jet::Vector{TaylorN{U}}
+    x_ini::Vector{U}
 end
 
 function EquilibriumProblem(;
@@ -25,13 +22,6 @@ function EquilibriumProblem(;
     dim = length(x_ini)
     dim_variables = dim - dim_params
 
-    dx = zero(x_ini)
-
-    equilibrium_space = JetSpace()
-
-    x_jet
-    dx_jet
-
     return EquilibriumProblem(
         f!,
         bc!,
@@ -42,8 +32,5 @@ function EquilibriumProblem(;
         dim_params,
         dim,
         x_ini,
-        dx,
-        x_jet,
-        dx_jet
     )
 end
