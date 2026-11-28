@@ -6,41 +6,47 @@ using LinearAlgebra
 using PeriodicSchurDecompositions
 using Printf
 
-# Integration
-include("integration/integration.jl")
+include("continuation/include.jl")
 
-# Objects
-include("objects/objects.jl")
+export Continuation
 
-# Equilibria
-include("equilibria/equilibria.jl")
+include("equilibria/include.jl")
 
-# Limit Points
-include("limitpoint/limitpoint.jl")
+# # Integration
+# include("integration/integration.jl")
 
-# Branch Points
-include("branchpoint/branchpoint.jl")
+# # Objects
+# include("objects/objects.jl")
 
-# Orbits
-include("orbits/orbits.jl")
+# # Equilibria
+# include("equilibria/equilibria.jl")
 
-# Flip Points
-include("flippoint/flippoint.jl")
+# # Limit Points
+# include("limitpoint/limitpoint.jl")
+
+# # Branch Points
+# include("branchpoint/branchpoint.jl")
+
+# # Orbits
+# include("orbits/orbits.jl")
+
+# # Flip Points
+# include("flippoint/flippoint.jl")
 
 
-export BPContinuation,
-    EquilibriaContinuation,
-    FPContinuation,
-    LPContinuation,
-    OrbitContinuation
+# export BPContinuation,
+#     EquilibriaContinuation,
+#     FPContinuation,
+#     LPContinuation,
+#     OrbitContinuation
 
-export HamiltonianBranchPoint,
-    HamiltonianBranchPointBranch,
-    HamiltonianLimitPoint,
-    HamiltonianLimitPointBranch,
-    HamiltonianEquilibriumBranch,
-    HamiltonianFlipPoint,
-    HamiltonianFlipPointBranch,
-    HamiltonianPeriodicBranch
+# export HamiltonianBranchPoint,
+#     HamiltonianBranchPointBranch,
+#     HamiltonianLimitPoint,
+#     HamiltonianLimitPointBranch,
+#     HamiltonianEquilibriumBranch,
+#     HamiltonianFlipPoint,
+#     HamiltonianFlipPointBranch,
+#     HamiltonianPeriodicBranch
 
 end
